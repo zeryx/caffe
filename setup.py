@@ -24,8 +24,9 @@ LIBRARIES = ['cblas', 'blas', 'boost_thread', 'glog', 'gflags', 'protobuf',
 
 compiler = ccompiler.new_compiler()
 for lib in LIBRARIES:
-    assert compiler.find_library_file(LIBDIRS, lib), \
-            'Could not find required library {}'.format(lib)
+    if not compiler.find_library_file(LIBDIRS, lib):
+        print('Could not find required library {}'.format(lib))
+        return
 
 # parse_requirements() returns generator of pip.req.InstallRequirement objects
 install_reqs = parse_requirements('python/requirements.txt',
