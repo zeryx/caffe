@@ -20,7 +20,7 @@ Package: caffe
 Version: 1.0rc2
 Section: mathematics
 Priority: optional
-Architecture: x86-64
+Architecture: amd64
 Depends: libprotobuf-dev, libleveldb-dev, libsnappy-dev, libopencv-dev, libhdf5-serial-dev, protobuf-compiler, libboost-all-dev, python-dev, libgflags-dev, libgoogle-glog-dev, liblmdb-dev
 Maintainer: Micah Chambers <micahc.vt@gmail.com>
 Description: Caffe is a machine learning toolset.
