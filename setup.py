@@ -26,6 +26,13 @@ compiler = ccompiler.new_compiler()
 for lib in LIBRARIES:
     if not compiler.find_library_file(LIBDIRS, lib):
         print('Could not find required library {}'.format(lib))
+        print("Required libraries: {}".format(LIBRARIES))
+        print("Required Ubuntu 14.04 packages: ")
+        print("sudo apt-get install libprotobuf-dev libleveldb-dev python-dev "
+              "libgflags-dev libgoogle-glog-dev liblmdb-dev libsnappy-dev "
+              "libopencv-dev libhdf5-serial-dev protobuf-compiler "
+              "libatlas-base-dev")
+        print("sudo apt-get install --no-install-recommends libboost-all-dev")
         return
 
 # parse_requirements() returns generator of pip.req.InstallRequirement objects
