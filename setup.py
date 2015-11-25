@@ -18,7 +18,7 @@ SRC_GEN = [join(SRC_DIR, 'caffe/proto/caffe.pb.h'),
            join(SRC_DIR, 'caffe/proto/caffe.pb.cc')]
 
 # Test libraries
-LIBDIRS = ['/usr/lib']
+LIBDIRS = ['/usr/lib', '/usr/lib/x86_64-linux-gnu/']
 LIBRARIES = ['cblas', 'blas', 'boost_thread', 'glog', 'gflags', 'protobuf',
              'boost_python', 'boost_system', 'boost_filesystem', 'm', 'hdf5_hl',
              'hdf5']

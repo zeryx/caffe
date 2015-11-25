@@ -1,5 +1,6 @@
 #!/bin/bash
 
+set -x
 VERSION=1.0rc2-1
 ROOTDIR=caffe_${VERSION}
 
@@ -7,11 +8,12 @@ make all distribute
 mkdir $ROOTDIR
 mkdir -p $ROOTDIR/usr/bin
 mkdir -p $ROOTDIR/usr/lib
-mkdir -p $ROOTDIR/usr/lib/python2.7/dist-packages/caffe
+mkdir -p $ROOTDIR/usr/lib/python2.7/site-packages/caffe
 
+mv distribute/include/* $ROOTDIR/usr/include/
 mv distribute/bin/* $ROOTDIR/usr/bin
-mv distribute/python/caffe/* $ROOTDIR/usr/lib/python2.7/dist-packages/caffe
-mv distribute/python/lib/* $ROOTDIR/usr/lib/
+mv distribute/python/caffe/* $ROOTDIR/usr/lib/python2.7/site-packages/caffe
+mv distribute/lib/* $ROOTDIR/usr/lib/
 
 # Control
 mkdir $ROOTDIR/DEBIAN
