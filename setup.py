@@ -3,7 +3,6 @@
 import os
 from os.path import join, exists, abspath, dirname
 import subprocess
-from tempfile import NamedTemporaryFile
 from distutils.core import setup
 from distutils.core import Extension
 from distutils import ccompiler
@@ -18,15 +17,15 @@ SRC_GEN = [join(SRC_DIR, 'caffe/proto/caffe.pb.h'),
            join(SRC_DIR, 'caffe/proto/caffe.pb.cc')]
 
 # Test libraries
+LIBDIRS = ['/usr/lib']
 LIBRARIES = ['cblas', 'blas', 'boost_thread', 'glog', 'gflags', 'protobuf',
              'boost_python', 'boost_system', 'boost_filesystem', 'm', 'hdf5_hl',
              'hdf5']
+
 compiler = ccompiler.new_compiler()
-compiler.set_libraries(LIBRARIES)
-with NamedTemporaryFile(suffix='.cpp') as f:
-    f.write('#include <iostream> int main() { return 0; }')
-    print(f.name)
-    compiler.compile(f.name)
+for lib in LIBRARIES:
+    assert compiler.find_library_file(LIBDIRS, lib), \
+            'Could not find required library {}'.format(lib)
 
 # parse_requirements() returns generator of pip.req.InstallRequirement objects
 install_reqs = parse_requirements('python/requirements.txt',
@@ -81,51 +80,51 @@ for dirName, subdirList, fileList in os.walk('python'):
 
 caffe_module = Extension(
     'caffe/_caffe',
-    define_macros = [('CPU_ONLY', '1')],
-    libraries = libraries,
-    include_dirs = [
+    define_macros=[('CPU_ONLY', '1')],
+    libraries=LIBRARIES,
+    include_dirs=[
         SRC_DIR,
         INC_DIR,
         '/usr/include/python2.7',
         '/usr/lib/python2.7/dist-packages/numpy/core/include'
     ],
-    sources = sources,
-    extra_compile_args = ['-Wno-sign-compare'],
+    sources=sources,
+    extra_compile_args=['-Wno-sign-compare'],
 )
 
 setup(
-    name = 'caffe',
-    version = '1.0rc2',
-    description = ('Caffe is a deep learning framework made with expression, '
-                    'speed, and modularity in mind.'),
-    author = 'BVLC members and the open-source community',
-    url = 'https://github.com/BVLC/caffe',
-    license = 'BSD',
-    ext_modules = [caffe_module],
-    package_dir = {'': 'python'},
-    packages = ['caffe', 'caffe/proto'],
-    scripts = ['python/classify.py', 'python/detect.py', 'python/draw_net.py'],
-    platforms = ['Linux', 'MacOS X', 'Windows'],
-    long_description = ('Caffe is a deep learning framework made with '
-                        'expression,  speed, and modularity in mind. It is '
-                        'developed by the Berkeley Vision and Learning '
-                        'Center (BVLC) and community contributors.'),
-    install_requires = reqs,
-    keywords = ['caffe', 'deep learning'],
-    download_url = 'https://github.com/BVLC/caffe',
-    classifiers = ['Development Status :: 3 - Alpha',
-                   'Environment :: Console',
-                   'Intended Audience :: Developers',
-                   'Intended Audience :: Science/Research',
-                   'License :: OSI Approved :: BSD License',
-                   'Natural Language :: English',
-                   'Programming Language :: Python :: 2.7',
-                   'Programming Language :: Python :: 3',
-                   'Programming Language :: Python :: 3.3',
-                   'Programming Language :: Python :: 3.4',
-                   'Topic :: Scientific/Engineering :: Artificial Intelligence',
-                   'Topic :: Software Development',
-                   'Topic :: Utilities'],
-    provides = ['caffe'],
+    name='caffe',
+    version='1.0rc2',
+    description=('Caffe is a deep learning framework made with expression, '
+                 'speed, and modularity in mind.'),
+    author='BVLC members and the open-source community',
+    url='https://github.com/BVLC/caffe',
+    license='BSD',
+    ext_modules=[caffe_module],
+    package_dir={'': 'python'},
+    packages=['caffe', 'caffe/proto'],
+    scripts=['python/classify.py', 'python/detect.py', 'python/draw_net.py'],
+    platforms=['Linux', 'MacOS X', 'Windows'],
+    long_description=('Caffe is a deep learning framework made with '
+                      'expression,  speed, and modularity in mind. It is '
+                      'developed by the Berkeley Vision and Learning '
+                      'Center (BVLC) and community contributors.'),
+    install_requires=reqs,
+    keywords=['caffe', 'deep learning'],
+    download_url='https://github.com/BVLC/caffe',
+    classifiers=['Development Status :: 3 - Alpha',
+                 'Environment :: Console',
+                 'Intended Audience :: Developers',
+                 'Intended Audience :: Science/Research',
+                 'License :: OSI Approved :: BSD License',
+                 'Natural Language :: English',
+                 'Programming Language :: Python :: 2.7',
+                 'Programming Language :: Python :: 3',
+                 'Programming Language :: Python :: 3.3',
+                 'Programming Language :: Python :: 3.4',
+                 'Topic :: Scientific/Engineering :: Artificial Intelligence',
+                 'Topic :: Software Development',
+                 'Topic :: Utilities'],
+    provides=['caffe'],
 )
 
