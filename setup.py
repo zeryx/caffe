@@ -1,6 +1,7 @@
 #!/usr/bin/python2
 
 import os
+import sys
 from os.path import join, exists, abspath, dirname
 import subprocess
 from distutils.core import setup
@@ -33,7 +34,7 @@ for lib in LIBRARIES:
               "libopencv-dev libhdf5-serial-dev protobuf-compiler "
               "libatlas-base-dev")
         print("sudo apt-get install --no-install-recommends libboost-all-dev")
-        return
+        sys.exit(-1)
 
 # parse_requirements() returns generator of pip.req.InstallRequirement objects
 install_reqs = parse_requirements('python/requirements.txt',
