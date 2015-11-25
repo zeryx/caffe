@@ -3,8 +3,10 @@
 import os
 from os.path import join, exists, abspath, dirname
 import subprocess
+from tempfile import NamedTemporaryFile
 from distutils.core import setup
 from distutils.core import Extension
+from distutils import ccompiler
 import pip.download
 from pip.req import parse_requirements
 
@@ -14,6 +16,17 @@ SRC_DIR = join(BASE_DIR, 'src')
 INC_DIR = join(BASE_DIR, 'include')
 SRC_GEN = [join(SRC_DIR, 'caffe/proto/caffe.pb.h'),
            join(SRC_DIR, 'caffe/proto/caffe.pb.cc')]
+
+# Test libraries
+LIBRARIES = ['cblas', 'blas', 'boost_thread', 'glog', 'gflags', 'protobuf',
+             'boost_python', 'boost_system', 'boost_filesystem', 'm', 'hdf5_hl',
+             'hdf5']
+compiler = ccompiler.new_compiler()
+compiler.set_libraries(LIBRARIES)
+with NamedTemporaryFile(suffix='.cpp') as f:
+    f.write('#include <iostream> int main() { return 0; }')
+    print(f.name)
+    compiler.compile(f.name)
 
 # parse_requirements() returns generator of pip.req.InstallRequirement objects
 install_reqs = parse_requirements('python/requirements.txt',
@@ -69,9 +82,7 @@ for dirName, subdirList, fileList in os.walk('python'):
 caffe_module = Extension(
     'caffe/_caffe',
     define_macros = [('CPU_ONLY', '1')],
-    libraries = ['cblas', 'blas', 'boost_thread', 'glog', 'gflags', 'protobuf',
-                 'boost_python', 'boost_system', 'boost_filesystem', 'm',
-                 'hdf5_hl', 'hdf5'],
+    libraries = libraries,
     include_dirs = [
         SRC_DIR,
         INC_DIR,
