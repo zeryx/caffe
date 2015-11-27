@@ -12,16 +12,15 @@ from pip.req import parse_requirements
 
 BASE_DIR = abspath(dirname(__file__))
 PROTO_DIR = join(BASE_DIR, 'src/caffe/proto')
-SRC_DIR = join(BASE_DIR, 'src')
-INC_DIR = join(BASE_DIR, 'include')
-SRC_GEN = [join(SRC_DIR, 'caffe/proto/caffe.pb.h'),
-           join(SRC_DIR, 'caffe/proto/caffe.pb.cc')]
+MODULE_DIR = join(BASE_DIR, 'python/caffe')
+INC_DIR = [MODULE_DIR]
+SOURCES = [join(MODULE_DIR, '_caffe.cpp'), join(MODULE_DIR, 'caffe.pb.cc')]
 
 # Test libraries
 LIBDIRS = ['/usr/lib', '/usr/lib/x86_64-linux-gnu/']
 LIBRARIES = ['cblas', 'blas', 'boost_thread', 'glog', 'gflags', 'protobuf',
              'boost_python', 'boost_system', 'boost_filesystem', 'm', 'hdf5_hl',
-             'hdf5']
+             'hdf5', 'caffe']
 
 compiler = ccompiler.new_compiler()
 for lib in LIBRARIES:
@@ -50,54 +49,22 @@ except OSError:
     pass
 
 # Makes an empty __init__ file for the caffe.proto module
-if not exists(join(module_dir, '__init__.py')):
-    with open(join(module_dir, '__init__.py'), 'w') as f:
-        f.write('')
+with open(join(module_dir, '__init__.py'), 'w') as f:
+    f.write('')
 
-if not exists(join(module_dir, 'caffe_pb2.py')):
-    # Converts the caffe.proto protocol buffer into a python format
-    subprocess.call(['protoc',
-                     join(PROTO_DIR, 'caffe.proto'),
-                     '--proto_path', PROTO_DIR,
-                     '--python_out', join(BASE_DIR, 'python/caffe/proto')])
-
-# Find source files in src/* and python/*
-sources = []
-
-# Generates cc files from proto buffer
-if (not exists(join(PROTO_DIR, 'caffe.pb.cc')) or
-        not exists(join(PROTO_DIR, 'caffe.pb.h'))):
-    # Converts the caffe.proto protocol buffer into a python format
-    subprocess.call(['protoc',
-                     join(PROTO_DIR, 'caffe.proto'),
-                     '--proto_path', PROTO_DIR,
-                     '--cpp_out', PROTO_DIR])
-
-for dirName, subdirList, fileList in os.walk(SRC_DIR):
-    if os.path.basename(dirName) in ('test'):
-        # Skip tests, utils
-        continue
-    for fname in fileList:
-        if fname.endswith('.cpp') or fname.endswith('.cc'):
-            sources.append(join(dirName, fname))
-
-for dirName, subdirList, fileList in os.walk('python'):
-    for fname in fileList:
-        if fname.endswith('.cpp') or fname.endswith('.cc'):
-            sources.append(join(dirName, fname))
-
+# Converts the caffe.proto protocol buffer into a python format
+subprocess.call(['protoc',
+                 join(PROTO_DIR, 'caffe.proto'),
+                 '--proto_path', PROTO_DIR,
+                 '--cpp_out', join(BASE_DIR, 'python/caffe/'),
+                 '--python_out', join(BASE_DIR, 'python/caffe/')])
 
 caffe_module = Extension(
     'caffe/_caffe',
     define_macros=[('CPU_ONLY', '1')],
     libraries=LIBRARIES,
-    include_dirs=[
-        SRC_DIR,
-        INC_DIR,
-        '/usr/include/python2.7',
-        '/usr/lib/python2.7/dist-packages/numpy/core/include'
-    ],
-    sources=sources,
+    include_dirs=INC_DIR,
+    sources=SOURCES,
     extra_compile_args=['-Wno-sign-compare'],
 )
 
