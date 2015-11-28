@@ -1,38 +1,40 @@
 #!/bin/bash
-# Run from the caffe root directory, does not include python bindins, use
-# setup.py for that
+# Run from the caffe root directory, does not include python bindings, use
+# setup.py for that. debian/ubuntu package 'devscripts' to run
+# Afterward you can upload the files somewhere, say
+#
+# http://world.com/hello/source/*
+#
+# then add the package to apt using (the trailing slashes are REQUIRED):
+# deb-src http://world.com/hello/ source/
+# debc http://world.com/hello/ binary/
+#
+# and get source or install binary using:
+# $ sudo apt-get update
+# $ sudo apt-get source caffe --allow-unauthenticated
+# $ sudo apt-get install caffe --allow-unauthenticated
 
 set -x
-VERSION=1.0rc2-1
-ARCH=amd64
-ROOTDIR=`mktemp -d`/caffe-${VERSION}_${ARCH}
+VERSION=1.0\~rc2
+ROOTDIR=`mktemp -d`
+SRCDIR=$ROOTDIR/caffe_${VERSION}
+OUTDIR=$PWD
 
-rm -fr $ROOTDIR
-rm -fr distribute
+git clone . $SRCDIR
 
-make distribute
-mkdir -p $ROOTDIR/usr/bin
-mkdir -p $ROOTDIR/usr/lib
-mkdir -p $ROOTDIR/usr/include
+# Tar up and build
+cd $ROOTDIR/
+tar --exclude-vcs -czf caffe_${VERSION}.orig.tar.gz caffe_${VERSION}
+cd $SRCDIR
+debuild -us -uc
 
-mv distribute/include/caffe $ROOTDIR/usr/include/
-mv distribute/bin/* $ROOTDIR/usr/bin
-mv distribute/lib/* $ROOTDIR/usr/lib/
+cd $ROOTDIR
+rm $OUTDIR/source/* $OUTDIR/binary/*
+rm -r $OUTDIR/source $OUTDIR/binary
+mkdir source binary
+mv *.deb binary
+mv *.{dsc,debian.tar.gz,orig.tar.gz,diff.gz} source
+dpkg-scanpackages binary /dev/null | gzip -9c > binary/Packages.gz
+dpkg-scansources source /dev/null | gzip -9c > source/Sources.gz
 
-# Control
-mkdir $ROOTDIR/DEBIAN
-echo "
-Package: caffe
-Version: ${VERSION}
-Section: mathematics
-Priority: optional
-Architecture: ${ARCH}
-Depends: libatlas-base-dev, libprotobuf-dev, libleveldb-dev, libsnappy-dev, libopencv-dev, libhdf5-serial-dev, protobuf-compiler, libboost-all-dev, python-dev, libgflags-dev, libgoogle-glog-dev, liblmdb-dev
-Maintainer: Micah Chambers <micahc.vt@gmail.com>
-Description: Caffe is a machine learning toolset.
-
-" > $ROOTDIR/DEBIAN/control
-
-dpkg-deb --build $ROOTDIR
-mv ${ROOTDIR}.deb ./
-# rm -fr $ROOTDIR
+mv binary source $OUTDIR

@@ -1,0 +1,24 @@
+#!/usr/bin/make -f
+# -*- makefile -*-
+
+# Uncomment this to turn on verbose mode.
+#export DH_VERBOSE=1
+
+%:
+	dh $@
+
+override_dh_auto_build:
+	make -j `nproc` CONFIG_FILE=dist/CPU_ONLY.config
+
+override_dh_auto_install:
+	make DISTRIBUTE_DIR=$$(pwd)/debian/caffe/usr CONFIG_FILE=dist/CPU_ONLY.config distribute
+
+override_dh_auto_test:
+
+
+override_dh_auto_clean:
+
+
+override_dh_auto_configure:
+
+

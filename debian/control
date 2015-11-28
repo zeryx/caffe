@@ -1,0 +1,15 @@
+Source: caffe
+Priority: optional
+Maintainer: Micah Chambers <micahc.vt@gmail.com>
+Build-Depends: debhelper (>= 8.0.0)
+Standards-Version: 3.9.5
+Section: libs
+Homepage: http://caffe.berkeleyvision.org/
+Vcs-Browser: https://github.com/MicahChambers/caffe
+
+Package: caffe
+Section: libs
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Machine learning toolset, written in C with Matlab and Python
+  bindings
