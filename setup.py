@@ -1,0 +1,106 @@
+#!/usr/bin/python2
+
+import os
+import sys
+from os.path import join, exists, abspath, dirname
+import subprocess
+from distutils.core import setup
+from distutils.core import Extension
+from distutils import ccompiler
+import pip.download
+from pip.req import parse_requirements
+
+BASE_DIR = abspath(dirname(__file__))
+PROTO_DIR = join(BASE_DIR, 'src/caffe/proto')
+MODULE_DIR = join(BASE_DIR, 'python/caffe')
+INC_DIR = [MODULE_DIR]
+SOURCES = [join(MODULE_DIR, '_caffe.cpp'), join(MODULE_DIR, 'caffe.pb.cc')]
+
+# Test libraries
+LIBDIRS = ['/usr/lib', '/usr/lib/x86_64-linux-gnu/']
+LIBRARIES = ['cblas', 'blas', 'boost_thread', 'glog', 'gflags', 'protobuf',
+             'boost_python', 'boost_system', 'boost_filesystem', 'm', 'hdf5_hl',
+             'hdf5', 'caffe']
+
+compiler = ccompiler.new_compiler()
+for lib in LIBRARIES:
+    if not compiler.find_library_file(LIBDIRS, lib):
+        print('Could not find required library {}'.format(lib))
+        print("Required libraries: {}".format(LIBRARIES))
+        print("Required Ubuntu 14.04 packages: ")
+        print("sudo apt-get install libprotobuf-dev libleveldb-dev python-dev "
+              "libgflags-dev libgoogle-glog-dev liblmdb-dev libsnappy-dev "
+              "libopencv-dev libhdf5-serial-dev protobuf-compiler "
+              "libatlas-base-dev")
+        print("sudo apt-get install --no-install-recommends libboost-all-dev")
+        sys.exit(-1)
+
+# parse_requirements() returns generator of pip.req.InstallRequirement objects
+install_reqs = parse_requirements('python/requirements.txt',
+                                  session=pip.download.PipSession())
+reqs = [str(ir.req) for ir in install_reqs]
+
+# Create the proto module in python/caffe, from the caffe proto buffer
+module_dir = join(BASE_DIR, 'python/caffe/proto')
+
+try:
+    os.makedirs(module_dir)
+except OSError:
+    pass
+
+# Makes an empty __init__ file for the caffe.proto module
+with open(join(module_dir, '__init__.py'), 'w') as f:
+    f.write('')
+
+# Converts the caffe.proto protocol buffer into a python format
+subprocess.call(['protoc',
+                 join(PROTO_DIR, 'caffe.proto'),
+                 '--proto_path', PROTO_DIR,
+                 '--cpp_out', join(BASE_DIR, 'python/caffe/'),
+                 '--python_out', join(BASE_DIR, 'python/caffe/')])
+
+caffe_module = Extension(
+    'caffe/_caffe',
+    define_macros=[('CPU_ONLY', '1')],
+    libraries=LIBRARIES,
+    include_dirs=INC_DIR,
+    sources=SOURCES,
+    extra_compile_args=['-Wno-sign-compare'],
+)
+
+setup(
+    name='caffe',
+    version='1.0rc2',
+    description=('Caffe is a deep learning framework made with expression, '
+                 'speed, and modularity in mind.'),
+    author='BVLC members and the open-source community',
+    url='https://github.com/BVLC/caffe',
+    license='BSD',
+    ext_modules=[caffe_module],
+    package_dir={'': 'python'},
+    packages=['caffe', 'caffe/proto'],
+    scripts=['python/classify.py', 'python/detect.py', 'python/draw_net.py'],
+    platforms=['Linux', 'MacOS X', 'Windows'],
+    long_description=('Caffe is a deep learning framework made with '
+                      'expression,  speed, and modularity in mind. It is '
+                      'developed by the Berkeley Vision and Learning '
+                      'Center (BVLC) and community contributors.'),
+    install_requires=reqs,
+    keywords=['caffe', 'deep learning'],
+    download_url='https://github.com/BVLC/caffe',
+    classifiers=['Development Status :: 3 - Alpha',
+                 'Environment :: Console',
+                 'Intended Audience :: Developers',
+                 'Intended Audience :: Science/Research',
+                 'License :: OSI Approved :: BSD License',
+                 'Natural Language :: English',
+                 'Programming Language :: Python :: 2.7',
+                 'Programming Language :: Python :: 3',
+                 'Programming Language :: Python :: 3.3',
+                 'Programming Language :: Python :: 3.4',
+                 'Topic :: Scientific/Engineering :: Artificial Intelligence',
+                 'Topic :: Software Development',
+                 'Topic :: Utilities'],
+    provides=['caffe'],
+)
+
