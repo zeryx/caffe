@@ -1,0 +1,11 @@
+#!/bin/sh
+# postinst script for caffe
+#
+# see: dh_installdeb(1)
+set -e
+
+# Auto-generated processing
+#DEBHELPER#
+
+exit 0
+
