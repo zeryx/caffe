@@ -103,7 +103,7 @@ caffe_module = Extension(
 
 setup(
     name='caffe',
-    version='1.0rc2',
+    version='1.0',
     description=('Caffe is a deep learning framework made with expression, '
                  'speed, and modularity in mind.'),
     author='BVLC members and the open-source community',
