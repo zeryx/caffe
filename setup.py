@@ -89,7 +89,8 @@ for dirName, subdirList, fileList in os.walk('python'):
 
 caffe_module = Extension(
     'caffe/_caffe',
-    define_macros=[('CPU_ONLY', '1')],
+#    define_macros=[('CPU_ONLY', '1')],
+    defin_macros=[],
     libraries=LIBRARIES,
     include_dirs=[
         SRC_DIR,
