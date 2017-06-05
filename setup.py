@@ -96,8 +96,7 @@ caffe_module = Extension(
         INC_DIR,
         '/usr/include/python2.7',
         '/usr/lib/python2.7/dist-packages/numpy/core/include',
-        '/usr/local/cuda/bin',
-	'/usr/local/cuda/lib64'
+	'/usr/local/cuda/include'
     ],
     sources=sources,
     extra_compile_args=['-Wno-sign-compare'],
