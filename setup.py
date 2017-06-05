@@ -89,8 +89,7 @@ for dirName, subdirList, fileList in os.walk('python'):
 
 caffe_module = Extension(
     'caffe/_caffe',
-#    define_macros=[('CPU_ONLY', '1')],
-    defin_macros=[],
+    define_macros=[('USE_CUDNN', '0')],
     libraries=LIBRARIES,
     include_dirs=[
         SRC_DIR,
@@ -106,7 +105,7 @@ caffe_module = Extension(
 
 setup(
     name='caffe',
-    version='1.0rc2',
+    version='1.0rc3',
     description=('Caffe is a deep learning framework made with expression, '
                  'speed, and modularity in mind.'),
     author='BVLC members and the open-source community',
